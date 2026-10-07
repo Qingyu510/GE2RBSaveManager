@@ -1,0 +1,29 @@
+# ---- Build results ----
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+
+# ---- Visual Studio ----
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# ---- VS Code / Rider ----
+.vscode/
+.idea/
+
+# ---- Build logs ----
+build.log
+*.log
+
+# ---- OS ----
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# ---- Backups produced at runtime (exe 同目录 backups) ----
+backups/

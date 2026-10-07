@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>GE2RBSaveManager</AssemblyName>
+    <RootNamespace>GE2RBSaveManager</RootNamespace>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- 补丁嵌入 exe，单文件自包含分发 -->
+    <EmbeddedResource Include="ps_asia_steam_main.txt" />
+    <EmbeddedResource Include="ps_asia_steam_card.txt" />
+    <EmbeddedResource Include="ps_us_steam_main.txt" />
+    <EmbeddedResource Include="ps_us_steam_card.txt" />
+  </ItemGroup>
+
+</Project>
