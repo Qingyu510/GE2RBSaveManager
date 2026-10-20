@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 namespace GE2RBSaveManager
 {
-    // GE2RB 槽位文件夹名（438490/remote 下固定）
+    // 槽位文件夹名（各游戏 <AppId>/remote 下固定；见 SlotFolderNames / SlotFolderNamesGER）
     // 槽位1 = ...000，槽位2 = ...001，槽位3 = ...002
     // 转换核心与 GE2RBConvertTool 同源；AppId 438490 = GOD EATER 2 Rage Burst
     public class MainForm : Form
@@ -66,15 +66,29 @@ namespace GE2RBSaveManager
             public override string ToString() => Label;
         }
 
-        const int AppId = 438490;
+        // ===== 游戏选择（顶部按钮）=====
+        // AppId 决定槽位 / 替换 / 删除 / 备份 / 修复vdf 使用的 userdata 子目录
+        // 438490 = 噬神者2：狂怒解放(GE2RB)；460870 = 噬神者：解放重生(GER)
+        const int AppIdGE2RB = 438490;
+        const int AppIdGER = 460870;
+        static int AppId = AppIdGE2RB;   // 当前选中游戏（默认狂怒解放）
 
         // 手动选择 Steam 目录：false = 注册表自动检测优先，检测不到再弹文件夹选择窗口
         const bool ForcePickSteamFolder = false;
+        // GE2RB(438490) 槽位文件夹名；末位 0/1/2 对应槽位 1/2/3
         static readonly string[] SlotFolderNames = {
             "GE211aa685531120001000",
             "GE211aa685531120001001",
             "GE211aa685531120001002",
         };
+        // GER(460870) 槽位文件夹名；末位 0/1/2 对应槽位 1/2/3
+        static readonly string[] SlotFolderNamesGER = {
+            "GE10db0505531180001000",
+            "GE10db0505531180001001",
+            "GE10db0505531180001002",
+        };
+        // 当前游戏对应的槽位文件夹名
+        static string[] SlotNames => AppId == AppIdGER ? SlotFolderNamesGER : SlotFolderNames;
 
         // ===== GUI 状态 =====
         string? draggedFolder = null;
@@ -102,6 +116,10 @@ namespace GE2RBSaveManager
         TextBox txtLog = null!;
         Button btnFixVdf = null!;
         Button btnOpenBackup = null!;
+        Button btnGameGer = null!;      // 游戏选择：噬神者：解放重生
+        Button btnGameGe2rb = null!;    // 游戏选择：噬神者2：狂怒解放
+        Button btnDecrypt = null!;      // 解密（调试用）
+        Button btnEncrypt = null!;      // 加密（调试用）
 
         public MainForm()
         {
@@ -137,16 +155,38 @@ namespace GE2RBSaveManager
             btnConv1.Click += OnConvButtonClick;
             btnConv2 = new Button { Dock = DockStyle.Fill, Text = "转换", Enabled = false };
             btnConv2.Click += OnConvButtonClick;
+            btnDecrypt = new Button { Dock = DockStyle.Fill, Text = "解密" };
+            btnDecrypt.Click += (s, e) => OnDecrypt();
+            btnEncrypt = new Button { Dock = DockStyle.Fill, Text = "加密" };
+            btnEncrypt.Click += (s, e) => OnEncrypt();
 
-            // 转换：2 个目标按钮并排 1 排
-            var tlpConvert = new TableLayoutPanel { Dock = DockStyle.Top, Height = 38, ColumnCount = 1, RowCount = 1 };
+            // 转换：2 个目标按钮并排 1 排；解密/加密并排 1 排
+            var tlpConvert = new TableLayoutPanel { Dock = DockStyle.Top, Height = 76, ColumnCount = 1, RowCount = 2 };
+            tlpConvert.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
             tlpConvert.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
             var tlpConvTargets = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
             tlpConvTargets.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpConvTargets.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
             tlpConvTargets.Controls.Add(btnConv1, 0, 0);
             tlpConvTargets.Controls.Add(btnConv2, 1, 0);
+            var tlpCrypto = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
+            tlpCrypto.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tlpCrypto.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tlpCrypto.Controls.Add(btnDecrypt, 0, 0);
+            tlpCrypto.Controls.Add(btnEncrypt, 1, 0);
             tlpConvert.Controls.Add(tlpConvTargets, 0, 0);
+            tlpConvert.Controls.Add(tlpCrypto, 0, 1);
+
+            // 游戏选择：拖入窗口上方，左右并排（左：解放重生 / 右：狂怒解放）
+            var tlpGame = new TableLayoutPanel { Dock = DockStyle.Top, Height = 38, ColumnCount = 2, RowCount = 1 };
+            tlpGame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            tlpGame.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
+            btnGameGer = new Button { Dock = DockStyle.Fill, Text = "噬神者：解放重生", FlatStyle = FlatStyle.Flat };
+            btnGameGe2rb = new Button { Dock = DockStyle.Fill, Text = "噬神者2：狂怒解放", FlatStyle = FlatStyle.Flat };
+            btnGameGer.Click += (s, e) => SelectGame(AppIdGER);
+            btnGameGe2rb.Click += (s, e) => SelectGame(AppIdGE2RB);
+            tlpGame.Controls.Add(btnGameGer, 0, 0);
+            tlpGame.Controls.Add(btnGameGe2rb, 1, 0);
 
             var lblInfo = new Label { Dock = DockStyle.Top, Height = 22, Text = "转换信息" };
             txtInfo = new TextBox { Dock = DockStyle.Fill, Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical };
@@ -154,7 +194,10 @@ namespace GE2RBSaveManager
             pLeft.Controls.Add(lblInfo);
             pLeft.Controls.Add(tlpConvert);
             pLeft.Controls.Add(dropPanel);
+            pLeft.Controls.Add(tlpGame);        // 最后 Add -> 排在最上方（拖入窗口之上）
             tlp.Controls.Add(pLeft, 0, 0);
+
+            UpdateGameButtons();
 
             // ---- 中列：steam 用户列表 ----
             var pMid = new Panel { Dock = DockStyle.Fill };
@@ -207,6 +250,28 @@ namespace GE2RBSaveManager
         }
 
         // ===================== 事件 =====================
+
+        // 切换当前游戏：更新 AppId，刷新游戏按钮高亮与槽位显示
+        void SelectGame(int appId)
+        {
+            if (AppId == appId) return;
+            AppId = appId;
+            UpdateGameButtons();
+            if (selectedAccount != null) LoadSlots(selectedAccount);
+            Log($"已切换游戏：{GameName(appId)}（AppId {appId}）");
+        }
+
+        // 当前选中的游戏按钮高亮，另一个暗下去（两者仍可点击，以便来回切换）
+        void UpdateGameButtons()
+        {
+            bool ger = AppId == AppIdGER;
+            btnGameGer.BackColor = ger ? SystemColors.ControlLightLight : SystemColors.ControlDark;
+            btnGameGe2rb.BackColor = ger ? SystemColors.ControlDark : SystemColors.ControlLightLight;
+        }
+
+        static string GameName(int appId) =>
+            appId == AppIdGER ? "噬神者：解放重生" : appId == AppIdGE2RB ? "噬神者2：狂怒解放" : appId.ToString();
+
         void OnDropFolder(string path)
         {
             if (File.Exists(path) && !Directory.Exists(path)) path = Path.GetDirectoryName(path) ?? path;
@@ -375,8 +440,8 @@ namespace GE2RBSaveManager
             Log($"已选择账户：{selectedAccount}");
         }
 
-        // 解密槽位 SECURE.BIN，读取解密后明文 0x57 与 0x97 处的 UTF-8 值（以 0x00 结尾）
-        // 返回形如 "清羽(shura)" 的字符串（0x97 为空时只返回 0x57 部分）
+        // 解密槽位 SECURE.BIN，读取解密后明文的名字(0x57)与代号处的 UTF-8 值（以 0x00 结尾）
+        // 代号偏移：解放重生(GER) = 0x77；狂怒解放(GE2RB) = 0x97（代号为空时只返回名字）
         static string? ReadPlayerName(string dir)
         {
             string sec = Path.Combine(dir, "SECURE.BIN");
@@ -400,16 +465,16 @@ namespace GE2RBSaveManager
 
             string a = ReadUtf8(0x57);
             if (string.IsNullOrEmpty(a)) return null;
-            string b = ReadUtf8(0x97);
+            string b = ReadUtf8(AppId == AppIdGER ? ASIA_CODE_OFFSET : US_CODE_OFFSET);
             return string.IsNullOrEmpty(b) ? a : $"{a}({b})";
         }
 
         void LoadSlots(string account)
         {
-            string remote = Path.Combine(userdataPath ?? "", account, "438490", "remote");
+            string remote = Path.Combine(userdataPath ?? "", account, AppId.ToString(), "remote");
             for (int i = 0; i < 3; i++)
             {
-                string dir = Path.Combine(remote, SlotFolderNames[i]);
+                string dir = Path.Combine(remote, SlotNames[i]);
                 slotDirs[i] = dir;
                 bool has = File.Exists(Path.Combine(dir, "SECURE.BIN"));
                 if (has)
@@ -433,7 +498,7 @@ namespace GE2RBSaveManager
             string backupRoot = BackupRoot;
             Directory.CreateDirectory(backupRoot);
             string ts = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-            string dest = Path.Combine(backupRoot, SlotFolderNames[i] + "_" + ts);
+            string dest = Path.Combine(backupRoot, SlotNames[i] + "_" + ts);
             CopyDirectory(slotDirs[i], dest);
             Log($"已备份槽位{i + 1} → {dest}");
         }
@@ -500,7 +565,7 @@ namespace GE2RBSaveManager
         void RepairVdf()
         {
             if (selectedAccount == null) { Log("请先选择 steam 账户。"); return; }
-            string remote = Path.Combine(userdataPath ?? "", selectedAccount, "438490", "remote");
+            string remote = Path.Combine(userdataPath ?? "", selectedAccount, AppId.ToString(), "remote");
             if (!Directory.Exists(remote)) { Log($"未找到 remote 目录：{remote}"); return; }
 
             Log("修复vdf文件具体效果：\r\n修复steam云存档状态，以此解决卡片加载错误问题。");
