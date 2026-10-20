@@ -68,6 +68,7 @@ Output: `GE2RBSaveManager/bin/Release/net48/GE2RBSaveManager.exe`
 ├── README.md                     # 简体中文
 ├── README.en.md                  # This file (English)
 ├── .gitignore
+├── LICENSE                       # GNU GPL v3.0 (full text)
 └── GE2RBSaveManager/
     ├── GE2RBSaveManager.csproj
     ├── Program.cs                # All logic (GUI + conversion core)
@@ -87,6 +88,32 @@ The four `*.txt` files below are embedded into the exe via `<EmbeddedResource>` 
 | `ps_asia_steam_card.txt` | PS Asia → Steam (card save) |
 | `ps_us_steam_main.txt` | PS US-EU → Steam (main save) |
 | `ps_us_steam_card.txt` | PS US-EU → Steam (card save) |
+
+## License
+
+This project is released under the **GNU General Public License v3.0**. See [LICENSE](LICENSE) for the full terms.
+
+```
+Copyright (C) 2026 Qingyu510
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
+
+### Credits & third-party sources
+
+- The save **decryption / encryption** implementation references [seulleta/GERSaveCryptTool](https://github.com/seulleta/GERSaveCryptTool).
+  That repository currently declares no license, so the GPL-3.0 grant of this project **does not extend to any original code from it**; the reference above is attribution and acknowledgement only. If that repository later declares a license, its own terms take precedence.
 
 ## Disclaimer
 

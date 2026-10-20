@@ -68,6 +68,7 @@ dotnet build -c Release
 ├── README.md                     # 本文档（简体中文）
 ├── README.en.md                  # English
 ├── .gitignore
+├── LICENSE                       # GNU GPL v3.0 全文
 └── GE2RBSaveManager/
     ├── GE2RBSaveManager.csproj
     ├── Program.cs                # 全部逻辑（GUI + 转换核心）
@@ -87,6 +88,32 @@ dotnet build -c Release
 | `ps_asia_steam_card.txt` | PS亚洲版 → Steam版（卡片存档） |
 | `ps_us_steam_main.txt` | PS欧美版 → Steam版（主存档） |
 | `ps_us_steam_card.txt` | PS欧美版 → Steam版（卡片存档） |
+
+## 许可证
+
+本项目以 **GNU General Public License v3.0** 发布，完整条款见 [LICENSE](LICENSE)。
+
+```
+Copyright (C) 2026 Qingyu510
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+```
+
+### 致谢与第三方来源
+
+- 存档的**解密 / 加密**实现参考了 [seulleta/GERSaveCryptTool](https://github.com/seulleta/GERSaveCryptTool)。
+  该仓库目前未声明开源许可证（No license），因此本项目的 GPL-3.0 授权**不延伸至该仓库的任何原创代码**；此处仅为技术参考的署名与致谢。若该仓库后续声明许可证，以其原仓库声明为准。
 
 ## 免责声明
 
